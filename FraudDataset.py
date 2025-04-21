@@ -26,7 +26,7 @@ def parseName(name: str):
 class FraudDataset(Dataset):
     def __init__(self, path):
         self.df = pd.read_csv(path, header=0)
-        scalar = MinMaxScaler()
+        scaler = MinMaxScaler()
         self.df['nameOrig'] = self.df['nameOrig'].apply(parseName)
         self.df['nameDest'] = self.df['nameDest'].apply(parseName)
         self.df['type'] = self.df['type'].apply(parseType)
@@ -34,11 +34,11 @@ class FraudDataset(Dataset):
             'step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest', 'oldbalanceDest',
             'newbalanceDest',
         ]
-        self.df[self.features] = scalar.fit_transform(self.df[self.features])
-        X_np = self.df[self.features].to_numpy(dtype=np.float32)
-        y_np = self.df['isFraud'].to_numpy(dtype=np.float32).reshape(-1, 1)
-        self.X = torch.from_numpy(X_np)
-        self.y = torch.from_numpy(y_np)
+        self.df[self.features] = scaler.fit_transform(self.df[self.features])
+        self.X = torch.tensor(self.df[self.features].values,
+                              dtype=torch.float32)
+        self.y = torch.tensor(self.df['isFraud'].values,
+                              dtype=torch.float32)
 
     def __len__(self):
         return len(self.df)

@@ -13,9 +13,9 @@ if __name__ == '__main__':
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
     train_dataloader = DataLoader(batch_size=256, dataset=train, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
-    ft_dataloader = DataLoader(batch_size=32, dataset=finetune, shuffle=True, num_workers=4, prefetch_factor=4, persistent_workers=True, pin_memory=True)
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0005)
+    ft_dataloader = DataLoader(batch_size=32, dataset=finetune, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     initial_epochs = 30
     ft_epochs = 10
     start_time = time.time()
@@ -26,6 +26,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             loss.backward()
             optimizer.step()
         print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Time:{time.time() - start_time}")
