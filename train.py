@@ -9,8 +9,8 @@ if __name__ == '__main__':
     model = FraudClassifier()
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
-    train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True)
-    ft_dataloader = DataLoader(batch_size=4, dataset=train, shuffle=True)
+    train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4)
+    ft_dataloader = DataLoader(batch_size=4, dataset=train, shuffle=True, num_workers=4)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0005)
     initial_epochs = 30
