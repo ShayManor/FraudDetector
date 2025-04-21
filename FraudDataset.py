@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
+from torch import float32
 from torch.utils.data import Dataset
 
 def parseType(type: str):
@@ -24,11 +25,11 @@ def parseName(name: str):
 
 class FraudDataset(Dataset):
     def __init__(self, path):
-        self.df = pd.read_csv(path, dtype=np.float32, header=0)
+        self.df = pd.read_csv(path, header=0)
         scalar = MinMaxScaler()
-        self.df['nameOrig'].apply(parseName)
-        self.df['nameDest'].apply(parseName)
-        self.df['type'].apply(parseType)
+        self.df['nameOrig'] = self.df['nameOrig'].apply(parseName)
+        self.df['nameDest'] = self.df['nameDest'].apply(parseName)
+        self.df['type'] = self.df['type'].apply(parseType)
         self.features = [
             'step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest', 'oldbalanceDest',
             'newbalanceDest',
@@ -39,5 +40,7 @@ class FraudDataset(Dataset):
         return len(self.df)
 
     def __getitem__(self, idx):
-        res = torch.tensor(self.df[self.features])
-        return res, self.df['isFraud']
+        row = self.df.iloc[idx]
+        x = row[self.features].to_numpy(dtype=np.float32)
+        res = torch.tensor(x, dtype=float32)
+        return res, torch.tensor(row['isFraud'], dtype=torch.float32).flatten()
