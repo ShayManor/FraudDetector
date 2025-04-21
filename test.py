@@ -16,7 +16,7 @@ def test(weights, csv_path):
     dataset = FraudDataset(csv_path)
     dataloader = DataLoader(batch_size=1, dataset=dataset, shuffle=True)
     model = FraudClassifier()
-    state = torch.load(weights, map_location=torch.device('cpu'))
+    state = torch.load(weights)
     model.load_state_dict(state)
     model.eval()
     criterion = nn.BCEWithLogitsLoss()
