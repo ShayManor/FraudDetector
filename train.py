@@ -1,10 +1,12 @@
+import time
+
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
-device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+# device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 if __name__ == '__main__':
     model = FraudClassifier()
     train = FraudDataset('train.csv')
@@ -15,6 +17,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.0005)
     initial_epochs = 30
     ft_epochs = 10
+    start_time = time.time()
     for epoch in range(initial_epochs):
         for inputs, labels in train_dataloader:
             optimizer.zero_grad()
@@ -22,7 +25,8 @@ if __name__ == '__main__':
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-        print(f"Epoch {epoch + 1}, Loss: {loss.item()}")
+        print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Time:{time.time() - start_time}")
+        start_time = 0
         print("--------------------------------")
     torch.save(model.state_dict(), 'weights.pt')
 
