@@ -6,13 +6,13 @@ from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
-# device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 if __name__ == '__main__':
     model = FraudClassifier()
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
-    train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4)
-    ft_dataloader = DataLoader(batch_size=4, dataset=train, shuffle=True, num_workers=4)
+    train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
+    ft_dataloader = DataLoader(batch_size=4, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0005)
     initial_epochs = 30
@@ -20,6 +20,8 @@ if __name__ == '__main__':
     start_time = time.time()
     for epoch in range(initial_epochs):
         for inputs, labels in train_dataloader:
+            inputs = inputs.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -32,11 +34,14 @@ if __name__ == '__main__':
 
     for epoch in range(ft_epochs):
         for inputs, labels in ft_dataloader:
+            inputs = inputs.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-        print(f"Epoch {epoch + 1}, Loss: {loss.item()}")
+        print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Time:{time.time() - start_time}")
+        start_time = 0
         print("--------------------------------")
     torch.save(model.state_dict(), 'ft_weights.pt')
