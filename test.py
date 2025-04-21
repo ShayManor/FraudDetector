@@ -6,13 +6,13 @@ from train import FraudDataset, FraudClassifier
 
 
 def check_correct(logit, label):
-    prob = sigmoid(logit).item()
+    prob = sigmoid(logit[0]).item()
     pred_class = 1 if prob >= 0.5 else 0
-    return pred_class == int(label.item())
+    return pred_class == int(label[0].item())
 
 def test(weights):
     dataset = FraudDataset('test.csv')
-    dataloader = DataLoader(batch_size=6, dataset=dataset, shuffle=True)
+    dataloader = DataLoader(batch_size=1, dataset=dataset, shuffle=True)
     model = FraudClassifier()
     state = torch.load(weights, map_location=torch.device('cpu'))
     model.load_state_dict(state)
@@ -24,13 +24,14 @@ def test(weights):
     for data, label in dataloader:
         output = model(data)
         pred = output.data
-        print(f"Pred: {pred}")
         correct = check_correct(pred, label)
         if not correct:
-            print(f'Incorrect case. Expected: {label[0]}, Received: {pred[0]}')
+            probs = torch.sigmoid(pred)
+            exp = torch.sigmoid(label)
+            print(f'Incorrect case. Expected: {exp}, Received: {probs}')
         correct_counter += int(correct)
         total += label.size(0)
-        loss = criterion(output, label)
+        loss = criterion(output.flatten(), label.flatten())
         test_loss += loss.item() * data.size(0)
     print(f'Testing Loss:{test_loss / len(dataloader)}')
     print(f'Correct Predictions: {correct_counter}/{total}')

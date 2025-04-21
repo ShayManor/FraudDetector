@@ -47,3 +47,6 @@ class FraudDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
+
+    def get_df(self):
+        return self.df

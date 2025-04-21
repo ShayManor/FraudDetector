@@ -14,7 +14,10 @@ if __name__ == '__main__':
     finetune = FraudDataset('finetune.csv')
     train_dataloader = DataLoader(batch_size=256, dataset=train, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
     ft_dataloader = DataLoader(batch_size=32, dataset=finetune, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
-    criterion = nn.BCEWithLogitsLoss()
+    df = train.get_df()
+    N_neg, N_pos = df['isFraud'].value_counts()[0], df['isFraud'].value_counts()[1]
+    pos_weight = torch.tensor([N_neg / N_pos], device=device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     initial_epochs = 30
     ft_epochs = 10
@@ -37,7 +40,10 @@ if __name__ == '__main__':
         start_time = 0
         print("--------------------------------")
     torch.save(model.state_dict(), 'weights.pt')
-
+    df = finetune.get_df()
+    N_neg, N_pos = df['isFraud'].value_counts()[0], df['isFraud'].value_counts()[1]
+    pos_weight = torch.tensor([N_neg / N_pos], device=device)
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     for epoch in range(ft_epochs):
         for inputs, labels in ft_dataloader:
             inputs = inputs.to(device, non_blocking=True)
