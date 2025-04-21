@@ -12,8 +12,8 @@ if __name__ == '__main__':
     model.to(device)
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
-    train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
-    ft_dataloader = DataLoader(batch_size=4, dataset=finetune, shuffle=True, num_workers=4, pin_memory=True)
+    train_dataloader = DataLoader(batch_size=128, dataset=train, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
+    ft_dataloader = DataLoader(batch_size=16, dataset=finetune, shuffle=True, num_workers=4, prefetch_factor=4, persistent_workers=True, pin_memory=True)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0005)
     initial_epochs = 30
