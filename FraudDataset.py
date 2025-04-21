@@ -35,12 +35,13 @@ class FraudDataset(Dataset):
             'newbalanceDest',
         ]
         self.df[self.features] = scalar.fit_transform(self.df[self.features])
+        X_np = self.df[self.features].to_numpy(dtype=np.float32)
+        y_np = self.df['isFraud'].to_numpy(dtype=np.float32).reshape(-1, 1)
+        self.X = torch.from_numpy(X_np)
+        self.y = torch.from_numpy(y_np)
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        x = row[self.features].to_numpy(dtype=np.float32)
-        res = torch.tensor(x, dtype=float32)
-        return res, torch.tensor(row['isFraud'], dtype=torch.float32).flatten()
+        return self.X[idx], self.y[idx]
