@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
-# device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 if __name__ == '__main__':
     model = FraudClassifier()
     train = FraudDataset('train.csv')
