@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
-from test import full_test
+from test import test
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__ == '__main__':
@@ -14,8 +14,10 @@ if __name__ == '__main__':
     model.to(device)
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
-    train_dataloader = DataLoader(batch_size=256, dataset=train, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
-    ft_dataloader = DataLoader(batch_size=32, dataset=finetune, shuffle=True, num_workers=8, prefetch_factor=4, persistent_workers=True, pin_memory=True)
+    train_dataloader = DataLoader(batch_size=256, dataset=train, shuffle=True, num_workers=8, prefetch_factor=4,
+                                  persistent_workers=True, pin_memory=True)
+    ft_dataloader = DataLoader(batch_size=32, dataset=finetune, shuffle=True, num_workers=8, prefetch_factor=4,
+                               persistent_workers=True, pin_memory=True)
     df = train.get_df()
     N_neg, N_pos = df['isFraud'].value_counts()[0], df['isFraud'].value_counts()[1]
     pos_weight = torch.tensor([N_neg / N_pos], device=device)
@@ -59,4 +61,8 @@ if __name__ == '__main__':
         start_time = 0
         print("--------------------------------")
     torch.save(model.state_dict(), 'ft_weights.pt')
-    full_test()
+    print('Begin testing for weights')
+    test('weights.pt')
+    print('---------------------------')
+    print('Begin testing for finetuned weights')
+    test('ft_weights.pt')
