@@ -22,12 +22,16 @@ if __name__ == '__main__':
     for epoch in range(initial_epochs):
         for inputs, labels in train_dataloader:
             inputs = inputs.to(device, non_blocking=True)
-            labels = labels.to(device, non_blocking=True).unsqueeze(1)
+            labels = labels.to(device, non_blocking=True).float().unsqueeze(1)
+            if torch.isnan(inputs).any():
+                raise RuntimeError("🛑 NaN in inputs")
+            if torch.isnan(labels).any():
+                raise RuntimeError("🛑 NaN in labels")
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
         print(f"Epoch {epoch + 1}, Loss: {loss.item()}, Time:{time.time() - start_time}")
         start_time = 0
