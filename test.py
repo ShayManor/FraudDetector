@@ -12,8 +12,8 @@ def check_correct(logit, label):
     return pred_class == int(label[0].item())
 
 
-def test(weights):
-    dataset = FraudDataset('test.csv')
+def test(weights, csv_path):
+    dataset = FraudDataset(csv_path)
     dataloader = DataLoader(batch_size=1, dataset=dataset, shuffle=True)
     model = FraudClassifier()
     state = torch.load(weights, map_location=torch.device('cpu'))
@@ -41,7 +41,15 @@ def test(weights):
 
 def full_test():
     print('Begin testing for weights')
-    test('weights.pt')
+    test('weights.pt', 'test.csv')
+    test('weights.pt', 'true.csv')
+    test('weights.pt', 'false.csv')
     print('---------------------------')
     print('Begin testing for finetuned weights')
-    test('ft_weights.pt')
+    test('ft_weights.pt', 'test.csv')
+    test('ft_weights.pt', 'true.csv')
+    test('ft_weights.pt', 'false.csv')
+
+
+if __name__ == '__main__':
+    full_test()
