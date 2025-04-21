@@ -34,6 +34,8 @@ class FraudDataset(Dataset):
             'step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest', 'oldbalanceDest',
             'newbalanceDest',
         ]
+        self.df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        self.df.dropna(subset=self.features, inplace=True)
         self.df[self.features] = scaler.fit_transform(self.df[self.features])
         self.X = torch.tensor(self.df[self.features].values,
                               dtype=torch.float32)
