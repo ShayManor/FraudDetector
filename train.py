@@ -9,6 +9,7 @@ from FraudDataset import FraudDataset
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 if __name__ == '__main__':
     model = FraudClassifier()
+    model.to(device)
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
     train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
