@@ -16,7 +16,7 @@ def test(weights, csv_path):
     dataset = FraudDataset(csv_path)
     dataloader = DataLoader(batch_size=1, dataset=dataset, shuffle=True)
     model = FraudClassifier()
-    state = torch.load(weights)
+    state = torch.load(weights, map_location=torch.device('cpu'))
     model.load_state_dict(state)
     model.eval()
     criterion = nn.BCEWithLogitsLoss()
@@ -42,14 +42,38 @@ def test(weights, csv_path):
 def full_test():
     print('Begin testing for weights')
     test('weights.pt', 'test.csv')
+    print('True test:')
     test('weights.pt', 'true.csv')
+    print('False test:')
     test('weights.pt', 'false.csv')
     print('---------------------------')
     print('Begin testing for finetuned weights')
     test('ft_weights.pt', 'test.csv')
+    print('True test:')
     test('ft_weights.pt', 'true.csv')
+    print('False test:')
     test('ft_weights.pt', 'false.csv')
 
 
 if __name__ == '__main__':
     full_test()
+
+# Begin testing for weights
+# Testing Loss:0.006604670058826224
+# Correct Predictions: 989669/991178
+# True test:
+# Testing Loss:90.53193622773803
+# Correct Predictions: 30/8213
+# False test:
+# Testing Loss:0.007720230532787741
+# Correct Predictions: 4947013/4955123
+# ---------------------------
+# Begin testing for finetuned weights
+# Testing Loss:0.9638416284434608
+# Correct Predictions: 568195/991178
+# True test:
+# Testing Loss:4.494162518536319
+# Correct Predictions: 5423/8213
+# False test:
+# Testing Loss:0.9736380548753285
+# Correct Predictions: 2833015/4955123
