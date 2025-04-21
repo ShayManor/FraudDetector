@@ -6,14 +6,14 @@ from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
-device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__ == '__main__':
     model = FraudClassifier()
     model.to(device)
     train = FraudDataset('train.csv')
     finetune = FraudDataset('finetune.csv')
     train_dataloader = DataLoader(batch_size=16, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
-    ft_dataloader = DataLoader(batch_size=4, dataset=train, shuffle=True, num_workers=4, pin_memory=True)
+    ft_dataloader = DataLoader(batch_size=4, dataset=finetune, shuffle=True, num_workers=4, pin_memory=True)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.0005)
     initial_epochs = 30
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     for epoch in range(initial_epochs):
         for inputs, labels in train_dataloader:
             inputs = inputs.to(device, non_blocking=True)
-            labels = labels.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True).unsqueeze(1)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     for epoch in range(ft_epochs):
         for inputs, labels in ft_dataloader:
             inputs = inputs.to(device, non_blocking=True)
-            labels = labels.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True).unsqueeze(1)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
