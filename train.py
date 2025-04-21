@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 
 from FraudClassifier import FraudClassifier
 from FraudDataset import FraudDataset
+from test import full_test
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__ == '__main__':
     model = FraudClassifier()
@@ -57,3 +59,4 @@ if __name__ == '__main__':
         start_time = 0
         print("--------------------------------")
     torch.save(model.state_dict(), 'ft_weights.pt')
+    full_test()

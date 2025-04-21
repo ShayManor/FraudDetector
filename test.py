@@ -10,6 +10,7 @@ def check_correct(logit, label):
     pred_class = 1 if prob >= 0.5 else 0
     return pred_class == int(label[0].item())
 
+
 def test(weights):
     dataset = FraudDataset('test.csv')
     dataloader = DataLoader(batch_size=1, dataset=dataset, shuffle=True)
@@ -28,11 +29,18 @@ def test(weights):
         if not correct:
             probs = torch.sigmoid(pred)
             exp = torch.sigmoid(label)
-            print(f'Incorrect case. Expected: {exp}, Received: {probs}')
+            # print(f'Incorrect case. Expected: {exp}, Received: {probs}')
         correct_counter += int(correct)
         total += label.size(0)
         loss = criterion(output.flatten(), label.flatten())
         test_loss += loss.item() * data.size(0)
     print(f'Testing Loss:{test_loss / len(dataloader)}')
     print(f'Correct Predictions: {correct_counter}/{total}')
-test('weights.pt')
+
+
+def full_test():
+    print('Begin testing for weights')
+    test('weights.pt')
+    print('---------------------------')
+    print('Begin testing for finetuned weights')
+    test('ft_weights.pt')
