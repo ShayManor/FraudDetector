@@ -2,7 +2,8 @@ import torch
 from torch import nn, sigmoid
 from torch.utils.data import DataLoader
 
-from train import FraudDataset, FraudClassifier
+from FraudDataset import FraudDataset
+from FraudClassifier import FraudClassifier
 
 
 def check_correct(logit, label):
